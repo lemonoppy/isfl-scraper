@@ -140,9 +140,9 @@ class Main {
 		return {
 			season: _season,
 			week: ParseWeekNumber(),
+			winner: ParseWinner(),
 			away: homeLine.team,
 			home: homeLine.team,
-			winner: ParseWinner(),
 			awayScore: awayLine.final,
 			homeScore: homeLine.final,
 			overtime: awayLine.overtime > 0 || homeLine.overtime > 0,
