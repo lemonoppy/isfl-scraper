@@ -9,7 +9,9 @@ class Main {
 		console.log("Scraping ISFL Game History");
 		let fullOutput = [];
 
-		for (let i = 1; i <= 47; i++) {
+		const finishedSeasons = 47;
+
+		for (let i = 1; i <= finishedSeasons; i++) {
 			const seasonOutput = await App.Start(i);
 			seasonOutput.forEach(game => {
 				fullOutput.push(game);
@@ -24,8 +26,8 @@ class Main {
 
 	ParseGame = function(_index, _season, _row) {
 		const tbody = _row.children[0];
-		const awayTeam = tbody.children[1];
-		const homeTeam = tbody.children[2];
+		const awayTeamTable = tbody.children[1];
+		const homeTeamTable = tbody.children[2];
 
 		function GetGameCount(_season) {
 			if (_season === 1) {
@@ -102,62 +104,50 @@ class Main {
 			};
 		}
 
-		const homeScore = ParseTeam(homeTeam);
-		const awayScore = ParseTeam(awayTeam);
+		const homeLine = ParseTeam(homeTeamTable);
+		const awayLine = ParseTeam(awayTeamTable);
 
 		function ParseWinner() {
-			if (homeScore.final === awayScore.final) {
+			if (homeLine.final === awayLine.final) {
 				return "Tie";
 			}
 
-			if (homeScore.final > awayScore.final) {
-				return homeScore.team;
+			if (homeLine.final > awayLine.final) {
+				return homeLine.team;
 			}
 
-			return awayScore.team;
+			return awayLine.team;
 		}
 
-		// S2 is kinda fucked for some reason
-		if (_season === 2) {
-			if(_index >= 16 && _index <= 47) {
-				return {
-					season: _season,
-					week: Math.ceil((_index + 1) / GetGameCount(_season)) - 4,
-					winner: ParseWinner(),
-					awayScore: ParseTeam(awayTeam),
-					homeScore: ParseTeam(homeTeam),
-				};
+		function ParseWeekNumber() {
+			// S2 is fucked cause they didn't fix the scheduling yet
+			if (_season === 2) {
+				if(_index >= 16 && _index <= 47)
+					return Math.ceil((_index + 1) / GetGameCount(_season)) - 4
+
+				if(_index >= 48 && _index <= 66)
+					return Math.ceil((_index + 2) / GetGameCount(_season)) - 4
+
+				if(_index >= 67)
+					return Math.ceil((_index + 3) / GetGameCount(_season)) - 4
 			}
 
-			if(_index >= 48 && _index <= 66) {
-				return {
-					season: _season,
-					week: Math.ceil((_index + 2) / GetGameCount(_season)) - 4,
-					winner: ParseWinner(),
-					awayScore: ParseTeam(awayTeam),
-					homeScore: ParseTeam(homeTeam),
-				};
-			}
-
-			if(_index >= 67) {
-				return {
-					season: _season,
-					week: Math.ceil((_index + 3) / GetGameCount(_season)) - 4,
-					winner: ParseWinner(),
-					awayScore: ParseTeam(awayTeam),
-					homeScore: ParseTeam(homeTeam),
-				};
-			}
+			return Math.ceil(_index / GetGameCount(_season)) - 5 < 0
+				? Math.ceil(_index / GetGameCount(_season)) - 5
+				: Math.ceil(_index / GetGameCount(_season)) - 4
 		}
 
 		return {
 			season: _season,
-			week: Math.ceil(_index / GetGameCount(_season)) - 5 < 0
-					? Math.ceil(_index / GetGameCount(_season)) - 5
-					: Math.ceil(_index / GetGameCount(_season)) - 4,
+			week: ParseWeekNumber(),
+			away: homeLine.team,
+			home: homeLine.team,
 			winner: ParseWinner(),
-			awayScore: ParseTeam(awayTeam),
-			homeScore: ParseTeam(homeTeam),
+			awayScore: awayLine.final,
+			homeScore: homeLine.final,
+			overtime: awayLine.overtime > 0 || homeLine.overtime > 0,
+			awayDetails: awayLine,
+			homeDetails: homeLine
 		};
 	}
 
