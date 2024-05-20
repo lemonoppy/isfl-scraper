@@ -56,6 +56,7 @@ class Main {
 				case 'Legion':
 					return "LVL";
 				case 'Second':
+				case 'Secondline':
 					return "NOLA";
 				case 'Silverbacks':
 					return "NYS";
@@ -141,7 +142,7 @@ class Main {
 			season: _season,
 			week: ParseWeekNumber(),
 			winner: ParseWinner(),
-			away: homeLine.team,
+			away: awayLine.team,
 			home: homeLine.team,
 			awayScore: awayLine.final,
 			homeScore: homeLine.final,
