@@ -10,7 +10,7 @@ class Main {
 		console.log("Scraping ISFL Game History");
 		let fullOutput = [];
 
-		const finishedSeasons = 47;
+		const finishedSeasons = 50;
 
 		for (let i = 1; i <= finishedSeasons; i++) {
 			const seasonOutput = await App.Start(i);
