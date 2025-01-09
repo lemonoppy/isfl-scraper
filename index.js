@@ -1,7 +1,7 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
 import fs from 'fs';
-import { ParseTeam, GetIndex, ParseWeekNumber } from "./utils.js";
+import { ParseTeam, GetIndex, GetBoxScoreLink, ParseWeekNumber } from "./utils.js";
 
 class Main {
 	static async Run() {
@@ -23,16 +23,6 @@ class Main {
 			if (err) throw err;
 			console.log(`JSON output complete: Full Output`);
 		});
-	}
-
-	GetBoxScore(_season, _href) {
-		if (_season <= 9) {
-			return `https://index.sim-football.com/NSFLS0${_season}/${_href}`
-		}
-		if (_season <= 23) {
-			return `https://index.sim-football.com/NSFLS${_season}/${_href}`
-		}
-		return `https://index.sim-football.com/ISFLS${_season}/${_href}`
 	}
 
 	ParseGame = function(_index, _season, _row, _link) {
@@ -70,19 +60,7 @@ class Main {
 		};
 	}
 
-
-
 	async Start(_season){
-		function GetIndex(_season) {
-			if (_season <= 9) {
-				return `https://index.sim-football.com/NSFLS0${_season}/GameResults.html`
-			}
-			if (_season <= 23) {
-				return `https://index.sim-football.com/NSFLS${_season}/GameResults.html`
-			}
-			return `https://index.sim-football.com/ISFLS${_season}/GameResults.html`
-		}
-
 		const response = await axios.request({
 			method: "GET",
 			url: GetIndex(_season),
@@ -98,7 +76,8 @@ class Main {
 		$('table').each((index, element, link) => {
 			if ((index + 1) % 3 === 0) {
 				// Really janky way to navigate the tree to get the boxscore href
-				const game = this.ParseGame((index + 1) / 3, _season, element, element.parent.parent.children[2].children[0].children[0].children[0].children[0].attribs.href);
+				const boxScoreLink = GetBoxScoreLink(_season, element.parent.parent.children[2].children[0].children[0].children[0].children[0].attribs.href)
+				const game = this.ParseGame((index + 1) / 3, _season, element, boxScoreLink);
 				jsonOutput.push(game);
 			}
 		})

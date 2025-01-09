@@ -136,11 +136,20 @@ function GetIndex(_season) {
         return `https://index.sim-football.com/NSFLS${_season}/GameResults.html`
     }
     return `https://index.sim-football.com/ISFLS${_season}/GameResults.html`
+}
 
+function GetBoxScoreLink(_season, _href) {
+	if (_season <= 9) {
+		return `https://index.sim-football.com/NSFLS0${_season}/${_href}`
+	}
+	if (_season <= 23) {
+		return `https://index.sim-football.com/NSFLS${_season}/${_href}`
+	}
+	return `https://index.sim-football.com/ISFLS${_season}/${_href}`
 }
 
 const TEAM_ABV = ["AUS", "AZ", "BAL", "BER", "CHI", "COL", "CTC", "HON", "LVL", "NOLA", "NYS", "OCO", "PHI", "SAR", "SJS", "YKW"];
 
 const TEAM_ABV_MODERN = ["AUS", "AZ", "BAL", "BER", "CHI", "COL", "CTC", "HON", "NOLA", "NYS", "OCO", "SAR", "SJS", "YKW"];
 
-export { GetGameCount, ParseWeekNumber, ParseTeamName, ParseTeamNameModern, ParseTeam, GetIndex, TEAM_ABV, TEAM_ABV_MODERN }
+export { GetGameCount, ParseWeekNumber, ParseTeamName, ParseTeamNameModern, ParseTeam, GetIndex, GetBoxScoreLink, TEAM_ABV, TEAM_ABV_MODERN }
