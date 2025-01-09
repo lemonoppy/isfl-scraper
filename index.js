@@ -9,7 +9,7 @@ class Main {
 		console.log("Scraping ISFL Game History");
 		let fullOutput = [];
 
-		const finishedSeasons = 47;
+		const finishedSeasons = 51;
 
 		for (let i = 1; i <= finishedSeasons; i++) {
 			const seasonOutput = await App.Start(i);
@@ -24,7 +24,17 @@ class Main {
 		});
 	}
 
-	ParseGame = function(_index, _season, _row) {
+	GetBoxScore(_season, _href) {
+		if (_season <= 9) {
+			return `https://index.sim-football.com/NSFLS0${_season}/${_href}`
+		}
+		if (_season <= 23) {
+			return `https://index.sim-football.com/NSFLS${_season}/${_href}`
+		}
+		return `https://index.sim-football.com/ISFLS${_season}/${_href}`
+	}
+
+	ParseGame = function(_index, _season, _row, _link) {
 		const tbody = _row.children[0];
 		const awayTeamTable = tbody.children[1];
 		const homeTeamTable = tbody.children[2];
@@ -148,7 +158,8 @@ class Main {
 			homeScore: homeLine.final,
 			overtime: awayLine.overtime > 0 || homeLine.overtime > 0,
 			awayDetails: awayLine,
-			homeDetails: homeLine
+			homeDetails: homeLine,
+			boxScore: _link,
 		};
 	}
 
@@ -163,7 +174,6 @@ class Main {
 				return `https://index.sim-football.com/NSFLS${_season}/GameResults.html`
 			}
 			return `https://index.sim-football.com/ISFLS${_season}/GameResults.html`
-
 		}
 
 		const response = await axios.request({
@@ -178,9 +188,10 @@ class Main {
 
 		let jsonOutput = []
 
-		$('table').each((index, element) => {
+		$('table').each((index, element, link) => {
 			if ((index + 1) % 3 === 0) {
-				const game = this.ParseGame((index + 1) / 3, _season, element);
+				// Really janky way to navigate the tree to get the boxscore href
+				const game = this.ParseGame((index + 1) / 3, _season, element, element.parent.parent.children[2].children[0].children[0].children[0].children[0].attribs.href);
 				jsonOutput.push(game);
 			}
 		})
