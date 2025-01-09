@@ -55,6 +55,10 @@ function ParseTeamName(_name) {
             return "BAL";
         case 'Fire':
             return "BER";
+				case 'Kaiju':
+						return "OSK";
+				case 'Brood':
+					return "BFB";
         case 'Butchers':
             return "CHI";
         case 'Yeti':
@@ -91,9 +95,11 @@ function ParseTeamNameModern(_name) {
         case 'Hawks':
             return "BAL";
         case 'Fire':
-            return "BER";
+				case 'Brood':
+            return "BFB";
         case 'Butchers':
-            return "CHI";
+				case 'Kaiju':
+            return "OSK";
         case 'Yeti':
             return "COL";
         case 'Liberty':
