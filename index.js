@@ -1,6 +1,7 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
 import fs from 'fs';
+import { ParseTeam, GetIndex, ParseWeekNumber } from "./utils.js";
 
 class Main {
 	static async Run() {
@@ -39,82 +40,6 @@ class Main {
 		const awayTeamTable = tbody.children[1];
 		const homeTeamTable = tbody.children[2];
 
-		function GetGameCount(_season) {
-			if (_season === 1) {
-				return 3;
-			}
-			if (_season <= 15) {
-				return 4;
-			}
-			if (_season <= 21) {
-				return 5;
-			}
-			if (_season <= 24) {
-				return 6;
-			}
-			return 7;
-		}
-
-		function ParseTeamName(_name) {
-			switch (_name) {
-				case 'Copperheads':
-					return "AUS";
-				case 'Outlaws':
-					return "AZ";
-				case 'Hahalua':
-					return "HON";
-				case 'Legion':
-					return "LVL";
-				case 'Second':
-				case 'Secondline':
-					return "NOLA";
-				case 'Silverbacks':
-					return "NYS";
-				case 'Otters':
-					return "OCO";
-				case 'SaberCats':
-					return "SJS";
-				case 'Hawks':
-					return "BAL";
-				case 'Fire':
-					return "BER";
-				case 'Butchers':
-					return "CHI";
-				case 'Yeti':
-					return "COL";
-				case 'Crash':
-					return "CTC";
-				case 'Liberty':
-					return "PHI";
-				case 'Sailfish':
-					return "SAR";
-				case 'Wraiths':
-					return "YKW";
-			}
-		}
-
-		function ParseTeam(_score) {
-			let teamName = _score.children[0].children[1].data.trim().split(' ')[0];
-
-			if (teamName.length <= 0) {
-				try {
-					teamName = _score.children[0].children[2].children[0].data.trim().split(' ')[0]
-				} catch (e) {
-					console.log(e)
-				}
-			}
-
-			return {
-				team: ParseTeamName(teamName),
-				first: parseInt(_score.children[1].children[0].data),
-				second: parseInt(_score.children[2].children[0].data),
-				third: parseInt(_score.children[3].children[0].data),
-				fourth: parseInt(_score.children[4].children[0].data),
-				overtime: _score.children.length === 7 ? parseInt(_score.children[5].children[0].data) : -1,
-				final: _score.children.length === 7 ? parseInt(_score.children[6].children[0].data) : parseInt(_score.children[5].children[0].data),
-			};
-		}
-
 		const homeLine = ParseTeam(homeTeamTable);
 		const awayLine = ParseTeam(awayTeamTable);
 
@@ -130,27 +55,9 @@ class Main {
 			return awayLine.team;
 		}
 
-		function ParseWeekNumber() {
-			// S2 is fucked cause they didn't fix the scheduling yet
-			if (_season === 2) {
-				if(_index >= 16 && _index <= 47)
-					return Math.ceil((_index + 1) / GetGameCount(_season)) - 4
-
-				if(_index >= 48 && _index <= 66)
-					return Math.ceil((_index + 2) / GetGameCount(_season)) - 4
-
-				if(_index >= 67)
-					return Math.ceil((_index + 3) / GetGameCount(_season)) - 4
-			}
-
-			return Math.ceil(_index / GetGameCount(_season)) - 5 < 0
-				? Math.ceil(_index / GetGameCount(_season)) - 5
-				: Math.ceil(_index / GetGameCount(_season)) - 4
-		}
-
 		return {
 			season: _season,
-			week: ParseWeekNumber(),
+			week: ParseWeekNumber(_index, _season),
 			winner: ParseWinner(),
 			away: awayLine.team,
 			home: homeLine.team,
